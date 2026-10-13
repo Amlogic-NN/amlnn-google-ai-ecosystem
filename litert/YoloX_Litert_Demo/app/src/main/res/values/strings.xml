@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">YOLOX</string>
+    <string name="title">YOLOX</string>
+    <string name="status_idle">Loading…</string>
+    <string name="status_loading_model">Loading model…</string>
+    <string name="status_running">Live detection running</string>
+    <string name="status_camera_denied">Camera permission denied</string>
+    <string name="start_detection">Start</string>
+    <string name="stop_detection">Stop</string>
+    <string name="camera_preview">Camera preview</string>
+</resources>
