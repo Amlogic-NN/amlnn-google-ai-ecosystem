@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="U:\07_JIRA_work\SWPL-202040-YOLOV8\YOLOV8M-1output\android\lib_interpreter\src\main\jniLibs"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="U:\07_JIRA_work\SWPL-202040-YOLOV8\YOLOV8M-1output\android\lib_interpreter\src\debug\jniLibs"/></dataSet></merger>
