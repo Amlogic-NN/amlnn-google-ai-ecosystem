@@ -1,0 +1,216 @@
+// Copyright 2025 Google LLC.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#ifndef THIRD_PARTY_ODML_LITERT_LITERT_C_OPTIONS_LITERT_MEDIATEK_OPTIONS_H_
+#define THIRD_PARTY_ODML_LITERT_LITERT_C_OPTIONS_LITERT_MEDIATEK_OPTIONS_H_
+
+#include "litert/c/litert_common.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
+typedef struct LrtMediatekOptions LrtMediatekOptions;
+
+// Creates a mediatek options object.
+// The caller is responsible for freeing the returned options using
+// `LrtDestroyMediatekOptions`.
+LiteRtStatus LrtCreateMediatekOptions(LrtMediatekOptions** options);
+
+// Creates a mediatek options object from a TOML payload.
+LiteRtStatus LrtCreateMediatekOptionsFromToml(const char* toml_payload,
+                                              LrtMediatekOptions** options);
+
+// Destroys a mediatek options object.
+void LrtDestroyMediatekOptions(LrtMediatekOptions* options);
+
+// Serializes mediatek options and returns the components needed to create
+// opaque options. The caller is responsible for passing these to
+// `LiteRtCreateOpaqueOptions` and freeing the returned payload using
+// `payload_deleter`.
+LiteRtStatus LrtGetOpaqueMediatekOptionsData(const LrtMediatekOptions* options,
+                                             const char** identifier,
+                                             void** payload,
+                                             void (**payload_deleter)(void*));
+
+// COMPILATION OPTIONS /////////////////////////////////////////////////////////
+
+// sdk_version_type ----------------------------------------------------------
+typedef enum LiteRtMediatekOptionsNeronSDKVersionType {
+  kLiteRtMediatekOptionsNeronSDKVersionTypeVersion7 = 0,
+  kLiteRtMediatekOptionsNeronSDKVersionTypeVersion8 = 1,
+  kLiteRtMediatekOptionsNeronSDKVersionTypeVersion9 = 2,
+} LiteRtMediatekOptionsNeronSDKVersion;
+
+LiteRtStatus LrtSetMediatekOptionsNeronSDKVersionType(
+    LrtMediatekOptions* options,
+    enum LiteRtMediatekOptionsNeronSDKVersionType sdk_version_type);
+
+LiteRtStatus LrtGetMediatekOptionsNeronSDKVersionType(
+    const LrtMediatekOptions* options,
+    enum LiteRtMediatekOptionsNeronSDKVersionType* sdk_version_type);
+
+// gemma_compiler_optimizations ----------------------------------------------
+LiteRtStatus LrtSetMediatekOptionsGemmaCompilerOptimizations(
+    LrtMediatekOptions* options, bool gemma_compiler_optimizations);
+
+LiteRtStatus LrtGetMediatekOptionsGemmaCompilerOptimizations(
+    const LrtMediatekOptions* options, bool* gemma_compiler_optimizations);
+
+// option_bundle -------------------------------------------------------------
+
+// The Neuron compiler `--option-bundle=` value used when
+// `gemma_compiler_optimizations` is enabled. These have no effect unless that
+// flag is set.
+//
+// The bundle is selected per subgraph: the decode partition uses
+// `option_bundle_decode` and the prefill partition uses
+// `option_bundle_prefill`. Any other subgraph falls back to
+// `option_bundle_decode`.
+//
+// `option_bundle` is an override that applies to every subgraph. It is unset
+// by default (empty string); when non-empty it takes precedence over both the
+// decode and prefill bundles. Use it for models that have more than the two
+// decode/prefill signatures.
+//
+// Leaving all three unset preserves the historical behavior of hardcoding
+// "gemma-decode-accuracy" and "gemma-prefill-accuracy".
+
+// Overrides the bundle for every subgraph. Empty means unset.
+LiteRtStatus LrtSetMediatekOptionsOptionBundle(LrtMediatekOptions* options,
+                                               const char* option_bundle);
+
+// Returns the override bundle for every subgraph.
+// Note: The returned string pointer is owned by `options` (or points to static
+// storage) and remains valid as long as `options` is alive and has not been
+// modified. It must not be freed or modified by the caller.
+LiteRtStatus LrtGetMediatekOptionsOptionBundle(
+    const LrtMediatekOptions* options, const char** option_bundle);
+
+// Bundle for the decode partition. Defaults to "gemma-decode-accuracy".
+LiteRtStatus LrtSetMediatekOptionsOptionBundleDecode(
+    LrtMediatekOptions* options, const char* option_bundle_decode);
+
+// Returns the bundle for the decode partition.
+// Note: The returned string pointer is owned by `options` (or points to static
+// storage) and remains valid as long as `options` is alive and has not been
+// modified. It must not be freed or modified by the caller.
+LiteRtStatus LrtGetMediatekOptionsOptionBundleDecode(
+    const LrtMediatekOptions* options, const char** option_bundle_decode);
+
+// Bundle for the prefill partition. Defaults to "gemma-prefill-accuracy".
+LiteRtStatus LrtSetMediatekOptionsOptionBundlePrefill(
+    LrtMediatekOptions* options, const char* option_bundle_prefill);
+
+// Returns the bundle for the prefill partition.
+// Note: The returned string pointer is owned by `options` (or points to static
+// storage) and remains valid as long as `options` is alive and has not been
+// modified. It must not be freed or modified by the caller.
+LiteRtStatus LrtGetMediatekOptionsOptionBundlePrefill(
+    const LrtMediatekOptions* options, const char** option_bundle_prefill);
+
+// neuron_adapter_peformance_mode --------------------------------------------
+
+// Configures MTK devices to optimize for performance or power efficiency.
+// See NeuronAdapterPreferenceCode in mtk_sdk. By default, it
+// will use  Sustained Speed answer.
+
+typedef enum LiteRtMediatekNeuronAdapterPerformanceMode {
+  /* Prefer executing in a way that minimizes battery drain. */
+  kLiteRtMediatekNeuronAdapterPerformanceModeNeuronPreferLowPower = 0,
+  /* Prefer executing as fast as possible. (more power consumption)*/
+  kLiteRtMediatekNeuronAdapterPerformanceModeNeuronPreferFastSingleAnswer = 1,
+  /* Prefer maximizing the throughput of successive frames */
+  kLiteRtMediatekNeuronAdapterPerformanceModeNeuronPreferSustainedSpeed = 2,
+  /* Prefer executing with turbo boost. (most power consumption) */
+  kLiteRtMediatekNeuronAdapterPerformanceModeNeuronPreferTurboBoost = 3,
+} LiteRtMediatekNeuronAdapterPerformanceMode;
+
+LiteRtStatus LrtSetMediatekOptionsPerformanceMode(
+    LrtMediatekOptions* options,
+    LiteRtMediatekNeuronAdapterPerformanceMode performance_mode);
+
+LiteRtStatus LrtGetMediatekOptionsPerformanceMode(
+    const LrtMediatekOptions* options,
+    LiteRtMediatekNeuronAdapterPerformanceMode* performance_mode);
+
+// l1_cache_optimizations ----------------------------------------------------
+LiteRtStatus LrtSetMediatekOptionsL1CacheOptimizations(
+    LrtMediatekOptions* options, bool l1_cache_optimizations);
+
+LiteRtStatus LrtGetMediatekOptionsL1CacheOptimizations(
+    const LrtMediatekOptions* options, bool* l1_cache_optimizations);
+
+// neuron_optimization_hints -------------------------------------------------
+
+// Configures MTK devices with optimization hints..
+// By default, it will use NEURON_OPTIMIZATION_NORMAL.
+
+typedef enum LiteRtMediatekNeuronAdapterOptimizationHint {
+  /* Normal optimization. Default Value */
+  kLiteRtMediatekNeuronAdapterOptimizationHintNormal = 0,
+  /* Reduce latency by utilizing as many APU cores as possible.*/
+  kLiteRtMediatekNeuronAdapterOptimizationHintLowLatency = 1 << 0,
+  /* Reducing DRAM access as more as possible.*/
+  kLiteRtMediatekNeuronAdapterOptimizationHintDeepFusion = 1 << 1,
+  /*Reduce latency by using as many APU cores as possible in batch-dimension.
+   * (For models with batch > 1)*/
+  kLiteRtMediatekNeuronAdapterOptimizationHintBatchProcessing = 1 << 2,
+} LiteRtMediatekNeuronAdapterOptimizationHint;
+
+LiteRtStatus LrtSetMediatekOptionsOptimizationHint(
+    LrtMediatekOptions* options,
+    LiteRtMediatekNeuronAdapterOptimizationHint optimization_hint);
+
+LiteRtStatus LrtGetMediatekOptionsOptimizationHint(
+    const LrtMediatekOptions* options,
+    LiteRtMediatekNeuronAdapterOptimizationHint* optimization_hint);
+
+// disable_dla_dir_removal ---------------------------------------------------
+LiteRtStatus LrtSetMediatekOptionsDisableDlaDirRemoval(
+    LrtMediatekOptions* options, bool disable_dla_dir_removal);
+
+LiteRtStatus LrtGetMediatekOptionsDisableDlaDirRemoval(
+    const LrtMediatekOptions* options, bool* disable_dla_dir_removal);
+
+// use_get_supported_operations ----------------------------------------------
+// Controls whether partitioning queries the Neuron compiler via
+// get_supported_operations (richer view of what the SDK can run) or just
+// uses the plugin's static IsOpSupported list. Defaults to true.
+LiteRtStatus LrtSetMediatekOptionsUseGetSupportedOperations(
+    LrtMediatekOptions* options, bool use_get_supported_operations);
+
+LiteRtStatus LrtGetMediatekOptionsUseGetSupportedOperations(
+    const LrtMediatekOptions* options, bool* use_get_supported_operations);
+
+// mediatek_dla_dir ----------------------------------------------------------
+
+LiteRtStatus LrtSetMediatekOptionsMediatekDlaDir(LrtMediatekOptions* options,
+                                                 const char* mediatek_dla_dir);
+
+LiteRtStatus LrtGetMediatekOptionsMediatekDlaDir(
+    const LrtMediatekOptions* options, const char** mediatek_dla_dir);
+
+// AoT compilation options --------------------------------------------
+LiteRtStatus LrtSetMediatekOptionsAotCompilationOptions(
+    LrtMediatekOptions* options, const char* aot_compilation_options);
+
+LiteRtStatus LrtGetMediatekOptionsAotCompilationOptions(
+    const LrtMediatekOptions* options, const char** aot_compilation_options);
+
+#ifdef __cplusplus
+
+}  // extern "C"
+
+#endif  // __cplusplus
+#endif  // THIRD_PARTY_ODML_LITERT_LITERT_C_OPTIONS_LITERT_MEDIATEK_OPTIONS_H_

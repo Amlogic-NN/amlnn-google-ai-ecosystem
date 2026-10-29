@@ -1,0 +1,247 @@
+// Copyright 2025 Google LLC.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+#ifndef THIRD_PARTY_ODML_LITERT_LITERT_CC_OPTIONS_LITERT_MEDIATEK_OPTIONS_H_
+#define THIRD_PARTY_ODML_LITERT_LITERT_CC_OPTIONS_LITERT_MEDIATEK_OPTIONS_H_
+
+#include <memory>
+#include <string>
+
+#include "litert/c/litert_common.h"
+#include "litert/c/options/litert_mediatek_options.h"
+#include "litert/cc/internal/litert_detail.h"
+#include "litert/cc/internal/litert_handle.h"
+#include "litert/cc/litert_api_types.h"
+#include "litert/cc/litert_expected.h"
+#include "litert/cc/litert_macros.h"
+#include "litert/cc/options/litert_concrete_options_base.h"
+
+namespace litert::mediatek {
+
+/// @brief Defines the C++ wrapper for MediaTek-specific LiteRT options.
+class MediatekOptions : public ConcreteOptionsBase {
+ public:
+  MediatekOptions() = delete;
+  explicit MediatekOptions(LrtMediatekOptions* options,
+                           OwnHandle own = OwnHandle::kYes)
+      : options_(
+            options, own == OwnHandle::kYes ? LrtDestroyMediatekOptions
+                                            : [](LrtMediatekOptions*) {}) {}
+
+  static Expected<MediatekOptions> Create() {
+    LrtMediatekOptions* options = nullptr;
+    LITERT_RETURN_IF_ERROR(LrtCreateMediatekOptions(&options));
+    return MediatekOptions(options, OwnHandle::kYes);
+  }
+
+  LrtMediatekOptions* Get() const { return options_.get(); }
+  LrtMediatekOptions* Release() { return options_.release(); }
+
+  static const char* Discriminator() { return "mediatek"; }
+
+  LiteRtStatus GetOpaqueOptionsData(
+      const char** identifier, void** payload,
+      void (**payload_deleter)(void*)) const override {
+    return LrtGetOpaqueMediatekOptionsData(Get(), identifier, payload,
+                                           payload_deleter);
+  }
+
+  /// @brief Specifies the version of the Neuron SDK to use.
+  enum class NeronSDKVersion : int {
+    kVersion7 = kLiteRtMediatekOptionsNeronSDKVersionTypeVersion7,
+    kVersion8 = kLiteRtMediatekOptionsNeronSDKVersionTypeVersion8,
+    kVersion9 = kLiteRtMediatekOptionsNeronSDKVersionTypeVersion9,
+  };
+
+  /// @brief Configures MTK devices to optimize for performance or power
+  /// efficiency.
+  enum class PerformanceMode : int {
+    kLowPower = kLiteRtMediatekNeuronAdapterPerformanceModeNeuronPreferLowPower,
+    kFastSingleAnswer =
+        kLiteRtMediatekNeuronAdapterPerformanceModeNeuronPreferFastSingleAnswer,
+    kSustainedSpeed =
+        kLiteRtMediatekNeuronAdapterPerformanceModeNeuronPreferSustainedSpeed,
+    kTurboBoost =
+        kLiteRtMediatekNeuronAdapterPerformanceModeNeuronPreferTurboBoost,
+  };
+
+  /// @brief Configures MTK devices with optimization hints.
+  enum class OptimizationHint : int {
+    kNormal = kLiteRtMediatekNeuronAdapterOptimizationHintNormal,
+    kLowLatency = kLiteRtMediatekNeuronAdapterOptimizationHintLowLatency,
+    kDeepFusion = kLiteRtMediatekNeuronAdapterOptimizationHintDeepFusion,
+    kBatchProcessing =
+        kLiteRtMediatekNeuronAdapterOptimizationHintBatchProcessing,
+  };
+
+  void SetNeronSDKVersionType(NeronSDKVersion sdk_version_type) {
+    internal::AssertOk(LrtSetMediatekOptionsNeronSDKVersionType, Get(),
+                       static_cast<LiteRtMediatekOptionsNeronSDKVersionType>(
+                           sdk_version_type));
+  }
+
+  NeronSDKVersion GetNeronSDKVersionType() {
+    LiteRtMediatekOptionsNeronSDKVersionType sdk_version_type;
+    internal::AssertOk(LrtGetMediatekOptionsNeronSDKVersionType, Get(),
+                       &sdk_version_type);
+    return static_cast<NeronSDKVersion>(sdk_version_type);
+  }
+
+  void SetEnableGemmaCompilerOptimizations(
+      bool enable_gemma_compiler_optimizations) {
+    internal::AssertOk(LrtSetMediatekOptionsGemmaCompilerOptimizations, Get(),
+                       enable_gemma_compiler_optimizations);
+  }
+
+  bool GetEnableGemmaCompilerOptimizations() {
+    bool enable_gemma_compiler_optimizations;
+    internal::AssertOk(LrtGetMediatekOptionsGemmaCompilerOptimizations, Get(),
+                       &enable_gemma_compiler_optimizations);
+    return enable_gemma_compiler_optimizations;
+  }
+
+  // Overrides the Neuron compiler `--option-bundle=` value for every subgraph.
+  // Only has an effect when Gemma compiler optimizations are enabled. Empty
+  // (the default) means the per-partition bundles below are used instead.
+  void SetOptionBundle(const std::string& option_bundle) {
+    internal::AssertOk(LrtSetMediatekOptionsOptionBundle, Get(),
+                       option_bundle.c_str());
+  }
+
+  StringView GetOptionBundle() {
+    const char* option_bundle;
+    internal::AssertOk(LrtGetMediatekOptionsOptionBundle, Get(),
+                       &option_bundle);
+    return StringView(option_bundle);
+  }
+
+  // Bundle used for the decode partition, and for any partition that is
+  // neither decode nor prefill.
+  void SetOptionBundleDecode(const std::string& option_bundle_decode) {
+    internal::AssertOk(LrtSetMediatekOptionsOptionBundleDecode, Get(),
+                       option_bundle_decode.c_str());
+  }
+
+  StringView GetOptionBundleDecode() {
+    const char* option_bundle_decode;
+    internal::AssertOk(LrtGetMediatekOptionsOptionBundleDecode, Get(),
+                       &option_bundle_decode);
+    return StringView(option_bundle_decode);
+  }
+
+  // Bundle used for the prefill partition.
+  void SetOptionBundlePrefill(const std::string& option_bundle_prefill) {
+    internal::AssertOk(LrtSetMediatekOptionsOptionBundlePrefill, Get(),
+                       option_bundle_prefill.c_str());
+  }
+
+  StringView GetOptionBundlePrefill() {
+    const char* option_bundle_prefill;
+    internal::AssertOk(LrtGetMediatekOptionsOptionBundlePrefill, Get(),
+                       &option_bundle_prefill);
+    return StringView(option_bundle_prefill);
+  }
+
+  void SetPerformanceMode(PerformanceMode performance_mode) {
+    internal::AssertOk(LrtSetMediatekOptionsPerformanceMode, Get(),
+                       static_cast<LiteRtMediatekNeuronAdapterPerformanceMode>(
+                           performance_mode));
+  }
+
+  PerformanceMode GetPerformanceMode() {
+    LiteRtMediatekNeuronAdapterPerformanceMode performance_mode;
+    internal::AssertOk(LrtGetMediatekOptionsPerformanceMode, Get(),
+                       &performance_mode);
+    return static_cast<PerformanceMode>(performance_mode);
+  }
+
+  void SetEnableL1CacheOptimizations(bool enable_l1_cache_optimizations) {
+    internal::AssertOk(LrtSetMediatekOptionsL1CacheOptimizations, Get(),
+                       enable_l1_cache_optimizations);
+  }
+
+  bool GetEnableL1CacheOptimizations() {
+    bool enable_l1_cache_optimizations;
+    internal::AssertOk(LrtGetMediatekOptionsL1CacheOptimizations, Get(),
+                       &enable_l1_cache_optimizations);
+    return enable_l1_cache_optimizations;
+  }
+
+  void SetOptimizationHint(OptimizationHint optimization_hint) {
+    internal::AssertOk(LrtSetMediatekOptionsOptimizationHint, Get(),
+                       static_cast<LiteRtMediatekNeuronAdapterOptimizationHint>(
+                           optimization_hint));
+  }
+
+  OptimizationHint GetOptimizationHint() {
+    LiteRtMediatekNeuronAdapterOptimizationHint optimization_hint;
+    internal::AssertOk(LrtGetMediatekOptionsOptimizationHint, Get(),
+                       &optimization_hint);
+    return static_cast<OptimizationHint>(optimization_hint);
+  }
+
+  void SetDisableDlaDirRemoval(bool disable_dla_dir_removal) {
+    internal::AssertOk(LrtSetMediatekOptionsDisableDlaDirRemoval, Get(),
+                       disable_dla_dir_removal);
+  }
+
+  bool GetDisableDlaDirRemoval() {
+    bool disable_dla_dir_removal;
+    internal::AssertOk(LrtGetMediatekOptionsDisableDlaDirRemoval, Get(),
+                       &disable_dla_dir_removal);
+    return disable_dla_dir_removal;
+  }
+
+  void SetUseGetSupportedOperations(bool use_get_supported_operations) {
+    internal::AssertOk(LrtSetMediatekOptionsUseGetSupportedOperations, Get(),
+                       use_get_supported_operations);
+  }
+
+  bool GetUseGetSupportedOperations() {
+    bool use_get_supported_operations;
+    internal::AssertOk(LrtGetMediatekOptionsUseGetSupportedOperations, Get(),
+                       &use_get_supported_operations);
+    return use_get_supported_operations;
+  }
+
+  void SetMediatekDlaDir(const std::string& mediatek_dla_dir) {
+    internal::AssertOk(LrtSetMediatekOptionsMediatekDlaDir, Get(),
+                       mediatek_dla_dir.c_str());
+  }
+
+  StringView GetMediatekDlaDir() {
+    const char* mediatek_dla_dir;
+    internal::AssertOk(LrtGetMediatekOptionsMediatekDlaDir, Get(),
+                       &mediatek_dla_dir);
+    return StringView(mediatek_dla_dir);
+  }
+
+  void SetAotCompilationOptions(const std::string& aot_compilation_options) {
+    internal::AssertOk(LrtSetMediatekOptionsAotCompilationOptions, Get(),
+                       aot_compilation_options.c_str());
+  }
+
+  StringView GetAotCompilationOptions() {
+    const char* aot_compilation_options;
+    internal::AssertOk(LrtGetMediatekOptionsAotCompilationOptions, Get(),
+                       &aot_compilation_options);
+    return StringView(aot_compilation_options);
+  }
+
+ private:
+  std::unique_ptr<LrtMediatekOptions, void (*)(LrtMediatekOptions*)> options_;
+};
+
+}  // namespace litert::mediatek
+
+#endif  // THIRD_PARTY_ODML_LITERT_LITERT_CC_OPTIONS_LITERT_MEDIATEK_OPTIONS_H_

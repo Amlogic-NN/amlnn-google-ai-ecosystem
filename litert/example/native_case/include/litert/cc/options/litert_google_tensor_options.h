@@ -1,0 +1,311 @@
+// Copyright 2025 Google LLC.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef THIRD_PARTY_ODML_LITERT_LITERT_CC_OPTIONS_LITERT_GOOGLE_TENSOR_OPTIONS_H_
+#define THIRD_PARTY_ODML_LITERT_LITERT_CC_OPTIONS_LITERT_GOOGLE_TENSOR_OPTIONS_H_
+
+#include <memory>
+#include <string>
+
+#include "litert/c/litert_common.h"
+#include "litert/c/options/litert_google_tensor_options.h"
+#include "litert/c/options/litert_google_tensor_options_type.h"
+#include "litert/cc/internal/litert_detail.h"
+#include "litert/cc/litert_api_types.h"
+#include "litert/cc/litert_expected.h"
+#include "litert/cc/litert_macros.h"
+#include "litert/cc/options/litert_concrete_options_base.h"
+
+namespace litert::google_tensor {
+
+class GoogleTensorOptions : public ConcreteOptionsBase {
+ public:
+  GoogleTensorOptions() = delete;
+
+  static const char* Discriminator() { return "google_tensor"; }
+
+  static Expected<GoogleTensorOptions> Create() {
+    LrtGoogleTensorOptions options;
+    LITERT_RETURN_IF_ERROR(LrtCreateGoogleTensorOptions(&options));
+    return GoogleTensorOptions(options);
+  }
+
+  LrtGoogleTensorOptions Get() const { return options_.get(); }
+
+  LiteRtStatus GetOpaqueOptionsData(
+      const char** identifier, void** payload,
+      void (**payload_deleter)(void*)) const override {
+    return LrtGetOpaqueGoogleTensorOptionsData(Get(), identifier, payload,
+                                               payload_deleter);
+  }
+
+  void SetFloatTruncationType(
+      LrtGoogleTensorOptionsTruncationType truncation_type) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetFloatTruncationType, Get(),
+                       truncation_type);
+  }
+
+  LrtGoogleTensorOptionsTruncationType GetFloatTruncationType() const {
+    LrtGoogleTensorOptions options_data = Get();
+    LrtGoogleTensorOptionsTruncationType truncation_type;
+    internal::AssertOk(LrtGoogleTensorOptionsGetFloatTruncationType,
+                       options_data, &truncation_type);
+    return truncation_type;
+  }
+
+  void SetInt64ToInt32Truncation(bool int64_to_int32_truncation) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetInt64ToInt32Truncation, Get(),
+                       int64_to_int32_truncation);
+  }
+
+  bool GetInt64ToInt32Truncation() const {
+    LrtGoogleTensorOptions options_data = Get();
+    bool int64_to_int32_truncation;
+    internal::AssertOk(LrtGoogleTensorOptionsGetInt64ToInt32Truncation,
+                       options_data, &int64_to_int32_truncation);
+    return int64_to_int32_truncation;
+  }
+
+  void SetOutputDir(StringView output_dir) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetOutputDir, Get(),
+                       output_dir.data());
+  }
+
+  StringView GetOutputDir() const {
+    LrtGoogleTensorOptions options_data = Get();
+    const char* output_dir;
+    internal::AssertOk(LrtGoogleTensorOptionsGetOutputDir, options_data,
+                       &output_dir);
+    return StringView(output_dir);
+  }
+
+  void SetDumpOpTimings(bool dump_op_timings) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetDumpOpTimings, Get(),
+                       dump_op_timings);
+  }
+
+  bool GetDumpOpTimings() const {
+    LrtGoogleTensorOptions options_data = Get();
+    bool dump_op_timings;
+    LrtGoogleTensorOptionsGetDumpOpTimings(options_data, &dump_op_timings);
+    return dump_op_timings;
+  }
+
+  bool GetEnableLargeModelSupport() const {
+    LrtGoogleTensorOptions options_data = Get();
+    bool enable_large_model_support;
+    LrtGoogleTensorOptionsGetEnableLargeModelSupport(
+        options_data, &enable_large_model_support);
+    return enable_large_model_support;
+  }
+
+  void SetEnableLargeModelSupport(bool enable_large_model_support) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetEnableLargeModelSupport, Get(),
+                       enable_large_model_support);
+  }
+
+  bool GetEnable4BitCompilation() const {
+    LrtGoogleTensorOptions options_data = Get();
+    bool enable_4bit_compilation;
+    LrtGoogleTensorOptionsGetEnable4BitCompilation(options_data,
+                                                   &enable_4bit_compilation);
+    return enable_4bit_compilation;
+  }
+
+  void SetEnable4BitCompilation(bool enable_4bit_compilation) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetEnable4BitCompilation, Get(),
+                       enable_4bit_compilation);
+  }
+
+  void SetShardingIntensity(
+      LrtGoogleTensorOptionsShardingIntensity sharding_intensity) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetShardingIntensity, Get(),
+                       sharding_intensity);
+  }
+
+  LrtGoogleTensorOptionsShardingIntensity GetShardingIntensity() const {
+    LrtGoogleTensorOptions options_data = Get();
+    LrtGoogleTensorOptionsShardingIntensity sharding_intensity;
+    LrtGoogleTensorOptionsGetShardingIntensity(options_data,
+                                               &sharding_intensity);
+    return sharding_intensity;
+  }
+
+  bool GetEnableDynamicRangeQuantization() const {
+    LrtGoogleTensorOptions options_data = Get();
+    bool enable_dynamic_range_quantization;
+    LrtGoogleTensorOptionsGetEnableDynamicRangeQuantization(
+        options_data, &enable_dynamic_range_quantization);
+    return enable_dynamic_range_quantization;
+  }
+
+  void SetEnableDynamicRangeQuantization(
+      bool enable_dynamic_range_quantization) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetEnableDynamicRangeQuantization,
+                       Get(), enable_dynamic_range_quantization);
+  }
+
+  enum class PerformanceMode {
+    kExtremePowerSaver =
+        kLiteRtGoogleTensorOptionsPerformanceModeExtremePowerSaver,
+    kPowerSaver = kLiteRtGoogleTensorOptionsPerformanceModePowerSaver,
+    kBalanced = kLiteRtGoogleTensorOptionsPerformanceModeBalanced,
+    kHighPerformance = kLiteRtGoogleTensorOptionsPerformanceModeHighPerformance,
+    kSustainedPerformance =
+        kLiteRtGoogleTensorOptionsPerformanceModeSustainedPerformance,
+    kBurst = kLiteRtGoogleTensorOptionsPerformanceModeBurst,
+  };
+
+  void SetPerformanceMode(PerformanceMode mode) {
+    LrtGoogleTensorOptions options_data = Get();
+    LrtGoogleTensorOptionsSetPerformanceMode(
+        options_data,
+        static_cast<LiteRtGoogleTensorOptionsPerformanceMode>(mode));
+  }
+
+  PerformanceMode GetPerformanceMode() const {
+    LrtGoogleTensorOptions options_data = Get();
+    LiteRtGoogleTensorOptionsPerformanceMode performance_mode;
+    if (LrtGoogleTensorOptionsGetPerformanceMode(
+            options_data, &performance_mode) != kLiteRtStatusOk) {
+      // If the value hasn't been set or any other error occurs, return a
+      // default value.
+      return PerformanceMode::kBalanced;
+    }
+    return static_cast<PerformanceMode>(performance_mode);
+  }
+
+  void SetOpFiltersProto(StringView op_filters_proto) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetOpFiltersProto, Get(),
+                       op_filters_proto.data());
+  }
+
+  StringView GetOpFiltersProto() const {
+    LrtGoogleTensorOptions options_data = Get();
+    const char* op_filters_proto;
+    internal::AssertOk(LrtGoogleTensorOptionsGetOpFiltersProto, options_data,
+                       &op_filters_proto);
+    return StringView(op_filters_proto);
+  }
+
+  void SetExtraOptionsPath(StringView extra_options_path) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetExtraOptionsPath, Get(),
+                       std::string(extra_options_path).c_str());
+  }
+
+  StringView GetExtraOptionsPath() const {
+    LrtGoogleTensorOptions options_data = Get();
+    const char* extra_options_path;
+    internal::AssertOk(LrtGoogleTensorOptionsGetExtraOptionsPath, options_data,
+                       &extra_options_path);
+    return StringView(extra_options_path);
+  }
+
+  /// @brief Sets whether the specified input tensor should use coherent memory.
+  /// @param signature_name The name of the model signature.
+  /// @param tensor_name The name of the input tensor in the signature.
+  /// @param prefer_coherent Whether to prefer coherent memory allocation and
+  ///     mapping.
+  void SetInputCoherency(StringView signature_name, StringView tensor_name,
+                         bool prefer_coherent) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetInputCoherency, Get(),
+                       signature_name.data(), tensor_name.data(),
+                       prefer_coherent);
+  }
+
+  /// @brief Gets whether the specified input tensor should use coherent memory.
+  /// @param signature_name The name of the model signature.
+  /// @param tensor_name The name of the input tensor in the signature.
+  bool GetInputCoherency(StringView signature_name,
+                         StringView tensor_name) const {
+    bool prefer_coherent = false;
+    internal::AssertOk(LrtGoogleTensorOptionsGetInputCoherency, Get(),
+                       signature_name.data(), tensor_name.data(),
+                       &prefer_coherent);
+    return prefer_coherent;
+  }
+
+  /// @brief Sets whether the specified output tensor should use coherent
+  /// memory.
+  /// @param signature_name The name of the model signature.
+  /// @param tensor_name The name of the output tensor in the signature.
+  /// @param prefer_coherent Whether to prefer coherent memory allocation and
+  ///     mapping.
+  void SetOutputCoherency(StringView signature_name, StringView tensor_name,
+                          bool prefer_coherent) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetOutputCoherency, Get(),
+                       signature_name.data(), tensor_name.data(),
+                       prefer_coherent);
+  }
+
+  /// @brief Gets whether the specified output tensor should use coherent
+  /// memory.
+  /// @param signature_name The name of the model signature.
+  /// @param tensor_name The name of the output tensor in the signature.
+  bool GetOutputCoherency(StringView signature_name,
+                          StringView tensor_name) const {
+    bool prefer_coherent = false;
+    internal::AssertOk(LrtGoogleTensorOptionsGetOutputCoherency, Get(),
+                       signature_name.data(), tensor_name.data(),
+                       &prefer_coherent);
+    return prefer_coherent;
+  }
+
+  void SetExtraOptions(StringView extra_options) {
+    internal::AssertOk(LrtGoogleTensorOptionsSetExtraOptions, Get(),
+                       std::string(extra_options).c_str());
+  }
+
+  StringView GetExtraOptions() const {
+    LrtGoogleTensorOptions options_data = Get();
+    const char* extra_options;
+    internal::AssertOk(LrtGoogleTensorOptionsGetExtraOptions, options_data,
+                       &extra_options);
+    return StringView(extra_options);
+  }
+
+  // copybara:uncomment_begin(google-only)
+  // // TODO(b/551885395): Remove this flag and enable by default after
+  // // verification.
+  // void SetExperimentalEnableInputValidator(
+      // bool experimental_enable_input_validator) {
+    // internal::AssertOk(
+        // LrtGoogleTensorOptionsSetExperimentalEnableInputValidator, Get(),
+        // experimental_enable_input_validator);
+  // }
+// 
+  // bool GetExperimentalEnableInputValidator() const {
+    // LrtGoogleTensorOptions options_data = Get();
+    // bool experimental_enable_input_validator;
+    // internal::AssertOk(
+        // LrtGoogleTensorOptionsGetExperimentalEnableInputValidator, options_data,
+        // &experimental_enable_input_validator);
+    // return experimental_enable_input_validator;
+  // }
+  // copybara:uncomment_end
+ private:
+  explicit GoogleTensorOptions(LrtGoogleTensorOptions options)
+      : options_(options) {}
+
+  struct Deleter {
+    void operator()(LrtGoogleTensorOptions options) const {
+      LrtDestroyGoogleTensorOptions(options);
+    }
+  };
+  std::unique_ptr<LrtGoogleTensorOptionsT, Deleter> options_;
+};
+
+}  // namespace litert::google_tensor
+
+#endif  // THIRD_PARTY_ODML_LITERT_LITERT_CC_OPTIONS_LITERT_GOOGLE_TENSOR_OPTIONS_H_
