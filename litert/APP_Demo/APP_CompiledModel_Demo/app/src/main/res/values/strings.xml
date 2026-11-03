@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">YOLOX</string>
-    <string name="title">YOLOX</string>
+    <string name="app_name">yolox_compiledmodel</string>
+    <string name="title">yolox_compiledmodel</string>
     <string name="status_idle">Loading…</string>
     <string name="status_loading_model">Loading model…</string>
     <string name="status_running">Live detection running</string>

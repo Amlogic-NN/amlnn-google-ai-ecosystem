@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -35,10 +37,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     packaging {
         jniLibs {
             // Keep .so extractable so BuiltinNpuAcceleratorProvider can dlopen
@@ -62,6 +60,12 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
+
 dependencies {
     // ---------------------------------------------------------------------------
     // Stack:
@@ -72,10 +76,11 @@ dependencies {
     // Do NOT use Bazel //litert/kotlin:litert.aar alone — its classes.jar is often
     // empty. Extract only libLiteRt.so from that AAR into jniLibs.
     // ---------------------------------------------------------------------------
-    implementation("com.google.ai.edge.litert:litert:2.1.0")
+    // Java/Kotlin API must match the libLiteRt.so you put in jniLibs.
+    implementation("com.google.ai.edge.litert:litert:2.3.0")
 
-    // Align with litert:2.1.0 (Kotlin metadata 2.2.0).
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
+    // Align with root Kotlin plugin (must read litert-api metadata 2.4.0).
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.0")
 
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
