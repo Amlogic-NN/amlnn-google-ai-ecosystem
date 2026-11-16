@@ -1,19 +1,34 @@
 # LiteRT
 
-On-device samples and prebuilt AML NPU libraries for Google LiteRT.
+[LiteRT](https://developers.google.com/edge/litert/overview) is Google's on-device inference engine for deploying ML and GenAI models on edge platforms, with tools to convert, optimize, and run them. Inference stays on the device (Android, iOS, Web, IoT, and desktop). Models use the `.tflite` format.
 
+LiteRT 2.x adds the `CompiledModel` API, the runtime interface for hardware acceleration. The `Interpreter` API (formerly TensorFlow Lite) stays available for compatibility and reaches accelerators through delegates. This tree connects both interfaces to the AML NPU.
+
+```mermaid
+flowchart LR
+  model[".tflite"] --> litert["LiteRT"]
+  litert --> interp["Interpreter"]
+  litert --> compiled["CompiledModel"]
+  interp --> delegate["AmlDelegate"]
+  delegate --> npu["AML NPU"]
+  compiled --> runtime["libLiteRt.so"]
+  runtime --> plugin["Compiler plugin\nJIT"]
+  runtime --> dispatch["Dispatch\noffline"]
+  plugin --> npu
+  dispatch --> npu
 ```
-litert/
-  example/
-    APP_Demo/
-      APP_CompiledModel_Demo/   # Android YOLOX, LiteRT CompiledModel
-      APP_Interpreter_Demo/     # Android YOLOX, TFLite Interpreter + AmlDelegate
-    APK/                        # prebuilt demo APKs
-    LiteRT_native_case/         # C++ CompiledModel JIT sample
-  libs/
-    CompiledModel_libs/         # libLiteRt.so and AML dispatch / compiler plugin
-    Interpreter_libs/           # LiteRT_AML.aar and libAML_Delegate.so
-```
+
+## Structure
+
+- `example/` — runnable samples and prebuilt APKs.
+- `example/APP_Demo/` — Android camera YOLOX apps, one per runtime interface.
+- `example/APP_Demo/APP_CompiledModel_Demo/` — YOLOX through LiteRT `CompiledModel`.
+- `example/APP_Demo/APP_Interpreter_Demo/` — YOLOX through TFLite `Interpreter` and `AmlDelegate`.
+- `example/APK/` — prebuilt demo APKs.
+- `example/LiteRT_native_case/` — minimal C++ `CompiledModel` JIT sample.
+- `libs/` — prebuilt libraries for the two AML paths.
+- `libs/CompiledModel_libs/` — `libLiteRt.so` plus the AML dispatch and compiler plugin, grouped by target.
+- `libs/Interpreter_libs/` — Android `LiteRT_AML.aar` and `libAML_Delegate.so`.
 
 ## example
 
@@ -58,11 +73,11 @@ Minimal C++ sample that JIT-compiles a `.tflite` through the AML plugin and runs
 
 Prebuilt LiteRT runtime and AML NPU libraries for the CompiledModel path, grouped by target:
 
-| Directory | Platform |
-|-----------|----------|
-| `arm` / `arm64` / `x86` | Android |
-| `linux-aarch64` | Linux aarch64 |
-| `yocto-aarch64` | Yocto aarch64 |
+| Directory               | Platform      |
+| ----------------------- | ------------- |
+| `arm` / `arm64` / `x86` | Android       |
+| `linux-aarch64`         | Linux aarch64 |
+| `yocto-aarch64`         | Yocto aarch64 |
 
 Each directory contains:
 
@@ -76,9 +91,9 @@ The Android demo uses `arm64`.
 
 Prebuilt Interpreter delegate for Android:
 
-| Directory | Contents |
-|-----------|----------|
-| `Android/arm` | `LiteRT_AML.aar`, `libAML_Delegate.so` |
+| Directory       | Contents                               |
+| --------------- | -------------------------------------- |
+| `Android/arm`   | `LiteRT_AML.aar`, `libAML_Delegate.so` |
 | `Android/arm64` | `LiteRT_AML.aar`, `libAML_Delegate.so` |
 
 `LiteRT_AML.aar` packages `org.tensorflow.lite.AmlDelegate`, `libtensorflowlite_aml_jni.so`, and the AML compilers:
