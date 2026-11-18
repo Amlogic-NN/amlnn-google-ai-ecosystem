@@ -24,7 +24,8 @@ flowchart LR
 - `example/APP_Demo/` — Android camera YOLOX apps, one per runtime interface.
 - `example/APP_Demo/APP_CompiledModel_Demo/` — YOLOX through LiteRT `CompiledModel`.
 - `example/APP_Demo/APP_Interpreter_Demo/` — YOLOX through TFLite `Interpreter` and `AmlDelegate`.
-- `example/APK/` — prebuilt demo APKs.
+- `example/APK/Release/` — current demo APKs, ADLA **v2.0.2.228.231.0** (2026.11.13).
+- `example/APK/Histroy_Version/adla_2.0.2.7.6_1020/` — 2026.10.20 APKs, ADLA **v2.0.2.7.6.0**.
 - `example/LiteRT_native_case/` — minimal C++ `CompiledModel` JIT sample.
 - `libs/` — prebuilt libraries for the two AML paths.
 - `libs/CompiledModel_libs/` — `libLiteRt.so` plus the AML dispatch and compiler plugin, grouped by target.
@@ -42,7 +43,7 @@ Dependencies:
 - **Native**: `libLiteRt.so` from `libs/CompiledModel_libs/arm64`, placed in `app/src/main/jniLibs/arm64-v8a/`
 - **AML NPU**: `libLiteRtDispatch_Aml.so` and `libLiteRtCompilerPlugin_Aml.so` from the same directory. NPU is used when `USE_NPU=true`
 
-Open `example/APP_Demo/APP_CompiledModel_Demo` in Android Studio and run it on an `arm64-v8a` device. See that directory's README for packaging details. A prebuilt APK is at `example/APK/Yolox_compiledmodel_261102.apk`.
+Open `example/APP_Demo/APP_CompiledModel_Demo` in Android Studio and run it on an `arm64-v8a` device. See that directory's README for packaging details. The current prebuilt APK is `example/APK/Release/Yolox_compiledmodel_261118.apk` (ADLA **v2.0.2.228.231.0**). The 2026.10.20 build is `example/APK/Histroy_Version/adla_2.0.2.7.6_1020/Yolox_compiledmodel_261102.apk` (ADLA **v2.0.2.7.6.0**).
 
 ### APP_Interpreter_Demo
 
@@ -56,7 +57,7 @@ Dependencies:
 
 `libAML_Delegate.so` next to the AAR is the C++ external delegate. This Java demo does not load it.
 
-Open `example/APP_Demo/APP_Interpreter_Demo` in Android Studio and run it on an `arm64-v8a` device. The first launch stays on “Loading model (AML JIT)…” until compilation finishes. A prebuilt APK is at `example/APK/YOLOX_Interprerter_261102.apk`.
+Open `example/APP_Demo/APP_Interpreter_Demo` in Android Studio and run it on an `arm64-v8a` device. The first launch stays on “Loading model (AML JIT)…” until compilation finishes. The current prebuilt APK is `example/APK/Release/YOLOX_Interprerter_261118.apk` (ADLA **v2.0.2.228.231.0**). The 2026.10.20 build is `example/APK/Histroy_Version/adla_2.0.2.7.6_1020/YOLOX_Interprerter_261102.apk` (ADLA **v2.0.2.7.6.0**).
 
 ### LiteRT_native_case
 
@@ -64,8 +65,15 @@ Minimal C++ sample that JIT-compiles a `.tflite` through the AML plugin and runs
 
 ### APK
 
-- `example/APK/Yolox_compiledmodel_261102.apk`: prebuilt CompiledModel demo.
-- `example/APK/YOLOX_Interprerter_261102.apk`: prebuilt Interpreter demo.
+`example/APK/Release/` is the current pair, built with ADLA **v2.0.2.228.231.0** (2026.11.13):
+
+- `example/APK/Release/Yolox_compiledmodel_261118.apk`: CompiledModel demo.
+- `example/APK/Release/YOLOX_Interprerter_261118.apk`: Interpreter demo.
+
+`example/APK/Histroy_Version/adla_2.0.2.7.6_1020/` keeps the 2026.10.20 builds, ADLA **v2.0.2.7.6.0**:
+
+- `example/APK/Histroy_Version/adla_2.0.2.7.6_1020/Yolox_compiledmodel_261102.apk`: CompiledModel demo.
+- `example/APK/Histroy_Version/adla_2.0.2.7.6_1020/YOLOX_Interprerter_261102.apk`: Interpreter demo.
 
 ## libs
 
@@ -96,7 +104,8 @@ Prebuilt Interpreter delegate for Android:
 | `Android/arm`   | `LiteRT_AML.aar`, `libAML_Delegate.so` |
 | `Android/arm64` | `LiteRT_AML.aar`, `libAML_Delegate.so` |
 
-`LiteRT_AML.aar` packages `org.tensorflow.lite.AmlDelegate`, `libtensorflowlite_aml_jni.so`, and the AML compilers:
+`LiteRT_AML.aar` packages `org.tensorflow.lite.AmlDelegate`, `libtensorflowlite_aml_jni.so`, and the AML compilers. Library versions:
 
 - `libaml_compiler_core.so`: AML compiler core, version **1.02**
 - `libcompiler_adla.so`: ADLA compiler, version **v3.5.3**
+- `libadla.so`: ADLA board runtime. The copy in `example/APP_Demo/APP_Interpreter_Demo/app/src/main/jniLibs/arm64-v8a/` is **v2.0.2.7.6.0** (2026.10.20), matching `Histroy_Version`. The APKs in `example/APK/Release/` ship **v2.0.2.228.231.0** (2026.11.13).
