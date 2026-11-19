@@ -4,19 +4,13 @@
 
 LiteRT 2.x adds the `CompiledModel` API, the runtime interface for hardware acceleration. The `Interpreter` API (formerly TensorFlow Lite) stays available for compatibility and reaches accelerators through delegates. This tree connects both interfaces to the AML NPU.
 
-```mermaid
-flowchart LR
-  model[".tflite"] --> litert["LiteRT"]
-  litert --> interp["Interpreter"]
-  litert --> compiled["CompiledModel"]
-  interp --> delegate["AmlDelegate"]
-  delegate --> npu["AML NPU"]
-  compiled --> runtime["libLiteRt.so"]
-  runtime --> plugin["Compiler plugin\nJIT"]
-  runtime --> dispatch["Dispatch\noffline"]
-  plugin --> npu
-  dispatch --> npu
-```
+**CompiledModel**
+
+![CompiledModel](images/compiled-model.png)
+
+**Interpreter**
+
+![Interpreter](images/interpreter.png)
 
 ## Structure
 

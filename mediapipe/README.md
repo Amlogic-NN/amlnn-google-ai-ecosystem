@@ -4,6 +4,8 @@
 
 The MediaPipe sample in this tree packages that stack for Android. `Android/Libs` holds the prebuilt Tasks AARs an app links against. `Android/Example/Release` holds the current camera demos for gesture recognition, hand landmarks, and pose landmarks. `Android/Example/History_Version` keeps older APKs. The 2026.10.20 builds (`adla-2.0.2.7.6_1020`) use ADLA **v2.0.2.7.6.0**, and those gesture demos include float and quantized builds.
 
+![MediaPipe](images/mediapipe.png)
+
 ## Structure
 
 - `Android/Libs/` — prebuilt MediaPipe Tasks AARs, grouped by ABI.
